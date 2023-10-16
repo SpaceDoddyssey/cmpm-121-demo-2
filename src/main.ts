@@ -16,6 +16,14 @@ const context = canvas.getContext("2d")!;
 const clearButton = document.getElementById("clearButton") as HTMLButtonElement;
 clearButton.addEventListener("click", clearCanvas);
 
+// Add a click event listener to the "Undo" button
+const undoButton = document.getElementById("undoButton") as HTMLButtonElement;
+undoButton.addEventListener("click", undo);
+
+// // Add a click event listener to the "Redo" button
+// const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
+// redoButton.addEventListener("click", redo);
+
 let isDrawing = false;
 
 // Define an interface to store drawing data
@@ -84,6 +92,21 @@ function redraw(event: CustomEvent) {
     }
   }
 }
+
+function undo() {
+  console.log("Undo!");
+  if (drawingData.paths.length > 0) {
+    drawingData.paths.pop();
+    const data = {
+      paths: drawingData.paths.concat([currentPath]),
+    };
+    canvas.dispatchEvent(new CustomEvent("drawing-changed", { detail: data }));
+  }
+}
+
+// function redo() {
+//   console.log("Redo!");
+// }
 
 // Register event listeners for drawing
 canvas.addEventListener("mousedown", startPath);
