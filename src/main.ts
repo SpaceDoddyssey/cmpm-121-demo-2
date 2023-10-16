@@ -19,10 +19,12 @@ clearButton.addEventListener("click", clearCanvas);
 // Add a click event listener to the "Undo" button
 const undoButton = document.getElementById("undoButton") as HTMLButtonElement;
 undoButton.addEventListener("click", undo);
+undoButton.disabled = true;
 
 // Add a click event listener to the "Redo" button
 const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
 redoButton.addEventListener("click", redo);
+redoButton.disabled = true;
 
 let isDrawing = false;
 
@@ -60,6 +62,8 @@ function stopPath() {
       currentPath = [];
     }
   }
+
+  checkAndEnableButtons();
 }
 
 // Clear the canvas
@@ -92,6 +96,8 @@ function redraw(event: CustomEvent) {
       context.stroke();
     }
   }
+
+  checkAndEnableButtons();
 }
 
 function undo() {
@@ -100,6 +106,8 @@ function undo() {
     drawingData.redoList.push(drawingData.paths.pop()!);
     draw();
   }
+
+  checkAndEnableButtons();
 }
 
 function redo() {
@@ -108,6 +116,13 @@ function redo() {
     drawingData.paths.push(drawingData.redoList.pop()!);
     draw();
   }
+
+  checkAndEnableButtons();
+}
+
+function checkAndEnableButtons() {
+  undoButton.disabled = drawingData.paths.length == 0;
+  redoButton.disabled = drawingData.redoList.length == 0;
 }
 
 function draw() {
