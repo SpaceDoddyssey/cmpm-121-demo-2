@@ -85,10 +85,9 @@ function redraw(event: CustomEvent) {
   }
 }
 
-// Register event listeners
+// Register event listeners for drawing
 canvas.addEventListener("mousedown", startPath);
 canvas.addEventListener("mousemove", addPoint);
 canvas.addEventListener("mouseup", stopPath);
 canvas.addEventListener("mouseout", stopPath);
 canvas.addEventListener("drawing-changed", redraw as EventListener);
-clearButton.addEventListener("click", clearCanvas);
