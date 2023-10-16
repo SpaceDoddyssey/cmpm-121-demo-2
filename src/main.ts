@@ -20,19 +20,20 @@ clearButton.addEventListener("click", clearCanvas);
 const undoButton = document.getElementById("undoButton") as HTMLButtonElement;
 undoButton.addEventListener("click", undo);
 
-// // Add a click event listener to the "Redo" button
-// const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
-// redoButton.addEventListener("click", redo);
+// Add a click event listener to the "Redo" button
+const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
+redoButton.addEventListener("click", redo);
 
 let isDrawing = false;
 
 // Define an interface to store drawing data
 interface DrawingData {
   paths: { x: number; y: number }[][];
+  redoList: { x: number; y: number }[][];
 }
 
 // Array to store user's drawing data
-const drawingData: DrawingData = { paths: [] };
+const drawingData: DrawingData = { paths: [], redoList: [] };
 let currentPath: { x: number; y: number }[] = [];
 
 // Start a new path
@@ -46,10 +47,7 @@ function startPath(event: MouseEvent) {
 function addPoint(event: MouseEvent) {
   if (isDrawing) {
     currentPath.push({ x: event.offsetX, y: event.offsetY });
-    const data = {
-      paths: drawingData.paths.concat([currentPath]),
-    };
-    canvas.dispatchEvent(new CustomEvent("drawing-changed", { detail: data }));
+    draw();
   }
 }
 
@@ -66,9 +64,12 @@ function stopPath() {
 
 // Clear the canvas
 function clearCanvas() {
-  drawingData.paths.length = 0;
+  drawingData.paths = [];
+  drawingData.redoList = [];
   canvas.dispatchEvent(
-    new CustomEvent<DrawingData>("drawing-changed", { detail: { paths: [] } })
+    new CustomEvent<DrawingData>("drawing-changed", {
+      detail: { paths: [], redoList: [] },
+    })
   );
 }
 
@@ -96,17 +97,25 @@ function redraw(event: CustomEvent) {
 function undo() {
   console.log("Undo!");
   if (drawingData.paths.length > 0) {
-    drawingData.paths.pop();
-    const data = {
-      paths: drawingData.paths.concat([currentPath]),
-    };
-    canvas.dispatchEvent(new CustomEvent("drawing-changed", { detail: data }));
+    drawingData.redoList.push(drawingData.paths.pop()!);
+    draw();
   }
 }
 
-// function redo() {
-//   console.log("Redo!");
-// }
+function redo() {
+  console.log("Redo!");
+  if (drawingData.redoList.length > 0) {
+    drawingData.paths.push(drawingData.redoList.pop()!);
+    draw();
+  }
+}
+
+function draw() {
+  const data = {
+    paths: drawingData.paths.concat([currentPath]),
+  };
+  canvas.dispatchEvent(new CustomEvent("drawing-changed", { detail: data }));
+}
 
 // Register event listeners for drawing
 canvas.addEventListener("mousedown", startPath);
