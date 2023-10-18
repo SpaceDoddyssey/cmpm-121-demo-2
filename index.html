@@ -11,9 +11,29 @@
     <div id="app">
       <canvas id="drawingCanvas" width="256" height="256" style="border:2px solid"></canvas>
       <br>
-      <button id="clearButton">Clear</button>
-      <button id="undoButton">Undo</button>
-      <button id="redoButton">Redo</button>
+    
+      <!-- First row of buttons -->
+      <div class="button-row">
+        <button id="clearButton">Clear</button>
+        <button id="undoButton">Undo</button>
+        <button id="redoButton">Redo</button>
+      </div>
+    
+      <!-- Second row of buttons -->
+      <div class="button-row">
+        Brush size: 
+        <button id="thinButton">
+          <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="5" fill="black" />
+          </svg>
+        </button>
+    
+        <button id="thickButton">
+          <svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="15" cy="15" r="10" fill="black" />
+          </svg>
+        </button>
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

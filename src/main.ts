@@ -26,13 +26,21 @@ const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
 redoButton.addEventListener("click", redo);
 redoButton.disabled = true;
 
+const thickButton = document.getElementById("thickButton") as HTMLButtonElement;
+thickButton.addEventListener("click", () => (curThickness = 10));
+const thinButton = document.getElementById("thinButton") as HTMLButtonElement;
+thinButton.addEventListener("click", () => (curThickness = 5));
+
 let isDrawing = false;
+let curThickness = 5;
 
 class MarkerLine {
   private points: { x: number; y: number }[] = [];
+  private thickness;
 
-  constructor(initialX: number, initialY: number) {
+  constructor(initialX: number, initialY: number, thickness: number) {
     this.points.push({ x: initialX, y: initialY });
+    this.thickness = thickness;
   }
 
   drag(x: number, y: number) {
@@ -43,7 +51,7 @@ class MarkerLine {
     if (this.points.length > 1) {
       ctx.strokeStyle = "black";
       ctx.lineJoin = "round";
-      ctx.lineWidth = 5;
+      ctx.lineWidth = this.thickness;
 
       ctx.beginPath();
       ctx.moveTo(this.points[0].x, this.points[0].y);
@@ -67,7 +75,11 @@ const drawingData: DrawingData = { paths: [], redoList: [] };
 // Start a new path
 function startPath(event: MouseEvent) {
   isDrawing = true;
-  const newMarkerLine = new MarkerLine(event.offsetX, event.offsetY);
+  const newMarkerLine = new MarkerLine(
+    event.offsetX,
+    event.offsetY,
+    curThickness
+  );
   drawingData.paths.push(newMarkerLine);
 }
 
