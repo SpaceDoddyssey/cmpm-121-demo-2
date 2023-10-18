@@ -28,42 +28,63 @@ redoButton.disabled = true;
 
 let isDrawing = false;
 
+class MarkerLine {
+  private points: { x: number; y: number }[] = [];
+
+  constructor(initialX: number, initialY: number) {
+    this.points.push({ x: initialX, y: initialY });
+  }
+
+  drag(x: number, y: number) {
+    this.points.push({ x, y });
+  }
+
+  display(ctx: CanvasRenderingContext2D) {
+    if (this.points.length > 1) {
+      ctx.strokeStyle = "black";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 5;
+
+      ctx.beginPath();
+      ctx.moveTo(this.points[0].x, this.points[0].y);
+      for (let i = 1; i < this.points.length; i++) {
+        ctx.lineTo(this.points[i].x, this.points[i].y);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
 // Define an interface to store drawing data
 interface DrawingData {
-  paths: { x: number; y: number }[][];
-  redoList: { x: number; y: number }[][];
+  paths: MarkerLine[];
+  redoList: MarkerLine[];
 }
 
 // Array to store user's drawing data
 const drawingData: DrawingData = { paths: [], redoList: [] };
-let currentPath: { x: number; y: number }[] = [];
 
 // Start a new path
 function startPath(event: MouseEvent) {
   isDrawing = true;
-  currentPath = [];
-  currentPath.push({ x: event.offsetX, y: event.offsetY });
+  const newMarkerLine = new MarkerLine(event.offsetX, event.offsetY);
+  drawingData.paths.push(newMarkerLine);
 }
 
 // Add a point to the current path
 function addPoint(event: MouseEvent) {
   if (isDrawing) {
-    currentPath.push({ x: event.offsetX, y: event.offsetY });
+    const currentPath = drawingData.paths[drawingData.paths.length - 1];
+    currentPath.drag(event.offsetX, event.offsetY);
     draw();
   }
 }
 
-// Stop the current path
 function stopPath() {
   if (isDrawing) {
     isDrawing = false;
-    if (currentPath.length > 0) {
-      drawingData.paths.push(currentPath);
-      currentPath = [];
-    }
+    checkAndEnableButtons();
   }
-
-  checkAndEnableButtons();
 }
 
 // Clear the canvas
@@ -78,22 +99,13 @@ function clearCanvas() {
 }
 
 // Function to redraw the user's lines
-function redraw(event: CustomEvent) {
-  const paths = (event.detail as DrawingData).paths;
-  context.clearRect(0, 0, canvas.width, canvas.height);
+function redraw() {
+  if (drawingData?.paths) {
+    const paths = drawingData.paths;
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (const path of paths) {
-    if (path.length > 1) {
-      context.strokeStyle = "black";
-      context.lineJoin = "round";
-      context.lineWidth = 5;
-
-      context.beginPath();
-      context.moveTo(path[0].x, path[0].y);
-      for (let i = 1; i < path.length; i++) {
-        context.lineTo(path[i].x, path[i].y);
-      }
-      context.stroke();
+    for (const path of paths) {
+      path.display(context);
     }
   }
 
@@ -126,10 +138,7 @@ function checkAndEnableButtons() {
 }
 
 function draw() {
-  const data = {
-    paths: drawingData.paths.concat([currentPath]),
-  };
-  canvas.dispatchEvent(new CustomEvent("drawing-changed", { detail: data }));
+  canvas.dispatchEvent(new CustomEvent("drawing-changed"));
 }
 
 // Register event listeners for drawing
@@ -137,4 +146,4 @@ canvas.addEventListener("mousedown", startPath);
 canvas.addEventListener("mousemove", addPoint);
 canvas.addEventListener("mouseup", stopPath);
 canvas.addEventListener("mouseout", stopPath);
-canvas.addEventListener("drawing-changed", redraw as EventListener);
+canvas.addEventListener("drawing-changed", redraw);
