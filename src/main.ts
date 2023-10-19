@@ -36,6 +36,38 @@ tenPxButton.addEventListener("click", () => (curThickness = 10));
 let isDrawing = false;
 let curThickness = 5;
 
+class ToolPreview {
+  x: number;
+  y: number;
+  isRendering: boolean;
+
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+    this.isRendering = false;
+  }
+  display(ctx: CanvasRenderingContext2D) {
+    if (this.isRendering) {
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = curThickness / 2;
+      ctx.beginPath();
+      ctx.ellipse(
+        this.x,
+        this.y,
+        curThickness / 4,
+        curThickness / 4,
+        0,
+        0,
+        2 * Math.PI
+      );
+      ctx.stroke();
+
+      // Fill the circle
+      ctx.fill();
+    }
+  }
+}
+
 class MarkerLine {
   private points: { x: number; y: number }[] = [];
   private thickness;
@@ -73,6 +105,7 @@ interface DrawingData {
 
 // Array to store user's drawing data
 const drawingData: DrawingData = { paths: [], redoList: [] };
+const toolPreview: ToolPreview = new ToolPreview(0, 0);
 
 // Start a new path
 function startPath(event: MouseEvent) {
@@ -83,15 +116,6 @@ function startPath(event: MouseEvent) {
     curThickness
   );
   drawingData.paths.push(newMarkerLine);
-}
-
-// Add a point to the current path
-function addPoint(event: MouseEvent) {
-  if (isDrawing) {
-    const currentPath = drawingData.paths[drawingData.paths.length - 1];
-    currentPath.drag(event.offsetX, event.offsetY);
-    draw();
-  }
 }
 
 function stopPath() {
@@ -123,7 +147,34 @@ function redraw() {
     }
   }
 
+  toolPreview.display(context);
+
   checkAndEnableButtons();
+}
+
+function draw() {
+  canvas.dispatchEvent(new CustomEvent("drawing-changed"));
+}
+
+function moveTool(event: MouseEvent) {
+  if (isDrawing) {
+    const currentPath = drawingData.paths[drawingData.paths.length - 1];
+    currentPath.drag(event.offsetX, event.offsetY);
+    draw();
+    return;
+  }
+
+  toolPreview.x = event.offsetX;
+  toolPreview.y = event.offsetY;
+  toolPreview.isRendering = true;
+
+  redraw();
+}
+
+function leaveCanvas() {
+  stopPath();
+  toolPreview.isRendering = false;
+  redraw();
 }
 
 function undo() {
@@ -151,13 +202,9 @@ function checkAndEnableButtons() {
   redoButton.disabled = drawingData.redoList.length == 0;
 }
 
-function draw() {
-  canvas.dispatchEvent(new CustomEvent("drawing-changed"));
-}
-
 // Register event listeners for drawing
 canvas.addEventListener("mousedown", startPath);
-canvas.addEventListener("mousemove", addPoint);
+canvas.addEventListener("mousemove", moveTool);
 canvas.addEventListener("mouseup", stopPath);
-canvas.addEventListener("mouseout", stopPath);
+canvas.addEventListener("mouseout", leaveCanvas);
 canvas.addEventListener("drawing-changed", redraw);
