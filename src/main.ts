@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import "./style.css";
 
+import { ToolPreview, MarkerLine, Sticker, Drawable } from "./renderObjects.ts";
+
 const app: HTMLDivElement = document.querySelector("#app")!;
 
 const gameName = "Cameron's Paint Game";
@@ -11,6 +13,8 @@ app.prepend(header);
 
 const canvas = document.getElementById("drawingCanvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d")!;
+context.textAlign = "center";
+context.font = "24px serif";
 
 // Add a click event listener to the "Clear" button
 const clearButton = document.getElementById("clearButton") as HTMLButtonElement;
@@ -27,95 +31,59 @@ redoButton.addEventListener("click", redo);
 redoButton.disabled = true;
 
 const twoPxButton = document.getElementById("2pxButton") as HTMLButtonElement;
-twoPxButton.addEventListener("click", () => (curThickness = 2));
+twoPxButton.addEventListener("click", () => setBrush(2));
 const fivePxButton = document.getElementById("5pxButton") as HTMLButtonElement;
-fivePxButton.addEventListener("click", () => (curThickness = 5));
+fivePxButton.addEventListener("click", () => setBrush(5));
 const tenPxButton = document.getElementById("10pxButton") as HTMLButtonElement;
-tenPxButton.addEventListener("click", () => (curThickness = 10));
+tenPxButton.addEventListener("click", () => setBrush(10));
+
+const smileButton = document.getElementById("smileButton") as HTMLButtonElement;
+smileButton.addEventListener("click", () => setBrush("😊"));
+const alienButton = document.getElementById("alienButton") as HTMLButtonElement;
+alienButton.addEventListener("click", () => setBrush("👽"));
+const thumbsupButton = document.getElementById(
+  "thumbsupButton"
+) as HTMLButtonElement;
+thumbsupButton.addEventListener("click", () => setBrush("👍"));
 
 let isDrawing = false;
-let curThickness = 5;
+export let curThickness = 5;
+export let curSticker = "";
 
-class ToolPreview {
-  x: number;
-  y: number;
-  isRendering: boolean;
-
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-    this.isRendering = false;
-  }
-  display(ctx: CanvasRenderingContext2D) {
-    if (this.isRendering) {
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = curThickness / 2;
-      ctx.beginPath();
-      ctx.ellipse(
-        this.x,
-        this.y,
-        curThickness / 4,
-        curThickness / 4,
-        0,
-        0,
-        2 * Math.PI
-      );
-      ctx.stroke();
-
-      // Fill the circle
-      ctx.fill();
-    }
-  }
-}
-
-class MarkerLine {
-  private points: { x: number; y: number }[] = [];
-  private thickness;
-
-  constructor(initialX: number, initialY: number, thickness: number) {
-    this.points.push({ x: initialX, y: initialY });
-    this.thickness = thickness;
-  }
-
-  drag(x: number, y: number) {
-    this.points.push({ x, y });
-  }
-
-  display(ctx: CanvasRenderingContext2D) {
-    if (this.points.length > 1) {
-      ctx.strokeStyle = "black";
-      ctx.lineJoin = "round";
-      ctx.lineWidth = this.thickness;
-
-      ctx.beginPath();
-      ctx.moveTo(this.points[0].x, this.points[0].y);
-      for (let i = 1; i < this.points.length; i++) {
-        ctx.lineTo(this.points[i].x, this.points[i].y);
-      }
-      ctx.stroke();
-    }
+function setBrush(arg: number | string) {
+  if (typeof arg === "number") {
+    curSticker = "";
+    curThickness = arg;
+  } else if (typeof arg === "string") {
+    curSticker = arg;
+    curThickness = 0;
   }
 }
 
 // Define an interface to store drawing data
 interface DrawingData {
-  paths: MarkerLine[];
-  redoList: MarkerLine[];
+  drawables: Drawable[];
+  redoList: Drawable[];
 }
 
 // Array to store user's drawing data
-const drawingData: DrawingData = { paths: [], redoList: [] };
+const drawingData: DrawingData = { drawables: [], redoList: [] };
 const toolPreview: ToolPreview = new ToolPreview(0, 0);
 
 // Start a new path
 function startPath(event: MouseEvent) {
   isDrawing = true;
-  const newMarkerLine = new MarkerLine(
-    event.offsetX,
-    event.offsetY,
-    curThickness
-  );
-  drawingData.paths.push(newMarkerLine);
+  if (curSticker == "") {
+    const newMarkerLine = new MarkerLine(
+      event.offsetX,
+      event.offsetY,
+      curThickness
+    );
+    drawingData.drawables.push(newMarkerLine);
+  } else {
+    const newSticker = new Sticker(event.offsetX, event.offsetY, curSticker);
+    drawingData.drawables.push(newSticker);
+  }
 }
 
 function stopPath() {
@@ -125,25 +93,24 @@ function stopPath() {
   }
 }
 
-// Clear the canvas
 function clearCanvas() {
-  drawingData.paths = [];
+  drawingData.drawables = [];
   drawingData.redoList = [];
   canvas.dispatchEvent(
     new CustomEvent<DrawingData>("drawing-changed", {
-      detail: { paths: [], redoList: [] },
+      detail: { drawables: [], redoList: [] },
     })
   );
 }
 
-// Function to redraw the user's lines
+// Redraw the user's lines
 function redraw() {
-  if (drawingData?.paths) {
-    const paths = drawingData.paths;
+  if (drawingData?.drawables) {
+    const drawables = drawingData.drawables;
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (const path of paths) {
-      path.display(context);
+    for (const drawable of drawables) {
+      drawable.display(context);
     }
   }
 
@@ -158,9 +125,10 @@ function draw() {
 
 function moveTool(event: MouseEvent) {
   if (isDrawing) {
-    const currentPath = drawingData.paths[drawingData.paths.length - 1];
-    currentPath.drag(event.offsetX, event.offsetY);
-    draw();
+    const currentDrawable =
+      drawingData.drawables[drawingData.drawables.length - 1];
+    currentDrawable.drag(event.offsetX, event.offsetY);
+    redraw();
     return;
   }
 
@@ -179,8 +147,8 @@ function leaveCanvas() {
 
 function undo() {
   console.log("Undo!");
-  if (drawingData.paths.length > 0) {
-    drawingData.redoList.push(drawingData.paths.pop()!);
+  if (drawingData.drawables.length > 0) {
+    drawingData.redoList.push(drawingData.drawables.pop()!);
     draw();
   }
 
@@ -190,7 +158,7 @@ function undo() {
 function redo() {
   console.log("Redo!");
   if (drawingData.redoList.length > 0) {
-    drawingData.paths.push(drawingData.redoList.pop()!);
+    drawingData.drawables.push(drawingData.redoList.pop()!);
     draw();
   }
 
@@ -198,7 +166,7 @@ function redo() {
 }
 
 function checkAndEnableButtons() {
-  undoButton.disabled = drawingData.paths.length == 0;
+  undoButton.disabled = drawingData.drawables.length == 0;
   redoButton.disabled = drawingData.redoList.length == 0;
 }
 
