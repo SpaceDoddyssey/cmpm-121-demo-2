@@ -26,10 +26,12 @@ const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
 redoButton.addEventListener("click", redo);
 redoButton.disabled = true;
 
-const thickButton = document.getElementById("thickButton") as HTMLButtonElement;
-thickButton.addEventListener("click", () => (curThickness = 10));
-const thinButton = document.getElementById("thinButton") as HTMLButtonElement;
-thinButton.addEventListener("click", () => (curThickness = 5));
+const twoPxButton = document.getElementById("2pxButton") as HTMLButtonElement;
+twoPxButton.addEventListener("click", () => (curThickness = 2));
+const fivePxButton = document.getElementById("5pxButton") as HTMLButtonElement;
+fivePxButton.addEventListener("click", () => (curThickness = 5));
+const tenPxButton = document.getElementById("10pxButton") as HTMLButtonElement;
+tenPxButton.addEventListener("click", () => (curThickness = 10));
 
 let isDrawing = false;
 let curThickness = 5;
