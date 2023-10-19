@@ -16,35 +16,31 @@ const context = canvas.getContext("2d")!;
 context.textAlign = "center";
 context.font = "24px serif";
 
-// Add a click event listener to the "Clear" button
-const clearButton = document.getElementById("clearButton") as HTMLButtonElement;
-clearButton.addEventListener("click", clearCanvas);
+// Create a data structure to define the buttons I'm going to be linking
+interface Button {
+  name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  func(): void;
+  disabled: boolean;
+}
+const buttons: Button[] = [
+  { name: "clearButton", func: clearCanvas, disabled: false },
+  { name: "undoButton", func: undo, disabled: true },
+  { name: "redoButton", func: redo, disabled: true },
+  { name: "2pxButton", func: () => setBrush(2), disabled: false },
+  { name: "5pxButton", func: () => setBrush(5), disabled: false },
+  { name: "10pxButton", func: () => setBrush(10), disabled: false },
+  { name: "smileButton", func: () => setBrush("😊"), disabled: false },
+  { name: "alienButton", func: () => setBrush("👽"), disabled: false },
+  { name: "thumbsupButton", func: () => setBrush("👍"), disabled: false },
+];
 
-// Add a click event listener to the "Undo" button
-const undoButton = document.getElementById("undoButton") as HTMLButtonElement;
-undoButton.addEventListener("click", undo);
-undoButton.disabled = true;
-
-// Add a click event listener to the "Redo" button
-const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
-redoButton.addEventListener("click", redo);
-redoButton.disabled = true;
-
-const twoPxButton = document.getElementById("2pxButton") as HTMLButtonElement;
-twoPxButton.addEventListener("click", () => setBrush(2));
-const fivePxButton = document.getElementById("5pxButton") as HTMLButtonElement;
-fivePxButton.addEventListener("click", () => setBrush(5));
-const tenPxButton = document.getElementById("10pxButton") as HTMLButtonElement;
-tenPxButton.addEventListener("click", () => setBrush(10));
-
-const smileButton = document.getElementById("smileButton") as HTMLButtonElement;
-smileButton.addEventListener("click", () => setBrush("😊"));
-const alienButton = document.getElementById("alienButton") as HTMLButtonElement;
-alienButton.addEventListener("click", () => setBrush("👽"));
-const thumbsupButton = document.getElementById(
-  "thumbsupButton"
-) as HTMLButtonElement;
-thumbsupButton.addEventListener("click", () => setBrush("👍"));
+// Actually link up the buttons
+for (const item of buttons) {
+  const button = document.getElementById(item.name) as HTMLButtonElement;
+  button.addEventListener("click", item.func.bind(this));
+  button.disabled = item.disabled;
+}
 
 let isDrawing = false;
 export let curThickness = 5;
@@ -165,6 +161,8 @@ function redo() {
   checkAndEnableButtons();
 }
 
+const undoButton = document.getElementById("undoButton") as HTMLButtonElement;
+const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
 function checkAndEnableButtons() {
   undoButton.disabled = drawingData.drawables.length == 0;
   redoButton.disabled = drawingData.redoList.length == 0;
