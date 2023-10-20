@@ -22,24 +22,23 @@ export class ToolPreview {
       return;
     }
 
-    const thickness = curThickness / 2;
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = thickness;
-    ctx.beginPath();
-    ctx.ellipse(
-      this.x,
-      this.y,
-      thickness / 2,
-      thickness / 2,
-      0,
-      0,
-      2 * Math.PI
-    );
-    ctx.stroke();
-
-    // Fill the circle
-    ctx.fill();
+    renderCircle(ctx, this.x, this.y, curThickness);
   }
+}
+
+function renderCircle(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number
+) {
+  const thickness = size / 2;
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = thickness;
+  ctx.beginPath();
+  ctx.ellipse(x, y, thickness / 2, thickness / 2, 0, 0, 2 * Math.PI);
+  ctx.stroke();
+  ctx.fill();
 }
 
 export class Sticker {
@@ -78,6 +77,9 @@ export class MarkerLine {
   }
 
   display(ctx: CanvasRenderingContext2D) {
+    //Render a circle at the start of the line
+    renderCircle(ctx, this.points[0].x, this.points[0].y, this.thickness);
+
     if (this.points.length > 1) {
       ctx.strokeStyle = "black";
       ctx.lineJoin = "round";
@@ -89,6 +91,14 @@ export class MarkerLine {
         ctx.lineTo(this.points[i].x, this.points[i].y);
       }
       ctx.stroke();
+
+      const lastIndex = this.points.length - 1;
+      renderCircle(
+        ctx,
+        this.points[lastIndex].x,
+        this.points[lastIndex].y,
+        this.thickness
+      );
     }
   }
 }
