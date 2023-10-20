@@ -42,6 +42,24 @@ for (const item of buttons) {
   button.disabled = item.disabled;
 }
 
+// Set up custom sticker button
+const stampButtonDiv = document.getElementById("stampButtonDiv")!;
+const customButton = document.getElementById("customButton")!;
+customButton.addEventListener("click", promptForStamp);
+function promptForStamp() {
+  const customText = prompt("Custom sticker text:");
+  if (customText == "") {
+    return;
+  }
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = customText;
+  button.addEventListener("click", () => setBrush(customText!));
+  stampButtonDiv.append(button);
+
+  console.log(customText);
+}
+
 let isDrawing = false;
 export let curThickness = 5;
 export let curSticker = "";
