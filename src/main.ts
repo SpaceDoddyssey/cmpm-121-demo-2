@@ -27,6 +27,7 @@ const buttons: Button[] = [
   { name: "clearButton", func: clearCanvas, disabled: false },
   { name: "undoButton", func: undo, disabled: true },
   { name: "redoButton", func: redo, disabled: true },
+  { name: "exportButton", func: exportDrawing, disabled: false },
   { name: "2pxButton", func: () => setBrush(2), disabled: false },
   { name: "5pxButton", func: () => setBrush(5), disabled: false },
   { name: "10pxButton", func: () => setBrush(10), disabled: false },
@@ -139,6 +140,7 @@ function draw() {
   canvas.dispatchEvent(new CustomEvent("drawing-changed"));
 }
 
+// Called when you move the mouse over the canvas, regardless of mouse button status
 function moveTool(event: MouseEvent) {
   if (isDrawing && curSticker == "") {
     const currentDrawable =
@@ -188,6 +190,32 @@ const redoButton = document.getElementById("redoButton") as HTMLButtonElement;
 function checkAndEnableButtons() {
   undoButton.disabled = drawingData.drawables.length == 0;
   redoButton.disabled = drawingData.redoList.length == 0;
+}
+
+function exportDrawing() {
+  // Create a new canvas element
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = 1024;
+  exportCanvas.height = 1024;
+  const exportContext = exportCanvas.getContext("2d")!;
+
+  // Scale the export context to match the larger canvas
+  exportContext.scale(4, 4);
+  exportContext.font = "24px serif";
+
+  // Copy over all items on the display list
+  for (const item of drawingData.drawables) {
+    item.display(exportContext);
+  }
+
+  // Convert the export canvas to a data URL
+  const exportDataUrl = exportCanvas.toDataURL("image/png");
+
+  // Create a download link and trigger the download
+  const downloadLink = document.createElement("a");
+  downloadLink.href = exportDataUrl;
+  downloadLink.download = "drawing.png";
+  downloadLink.click();
 }
 
 // Register event listeners for drawing
