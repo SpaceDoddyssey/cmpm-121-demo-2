@@ -53,6 +53,7 @@ export class Sticker {
     this.text = text;
   }
 
+  //Drag is currently never called, but I'm keeping it around in case I need to use it later
   drag(x: number, y: number) {
     this.x = x;
     this.y = y;

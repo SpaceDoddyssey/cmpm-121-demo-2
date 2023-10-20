@@ -76,15 +76,17 @@ function startPath(event: MouseEvent) {
       curThickness
     );
     drawingData.drawables.push(newMarkerLine);
-  } else {
-    const newSticker = new Sticker(event.offsetX, event.offsetY, curSticker);
-    drawingData.drawables.push(newSticker);
   }
 }
 
-function stopPath() {
+function stopPath(event: MouseEvent) {
   if (isDrawing) {
     isDrawing = false;
+
+    if (curSticker != "") {
+      const newSticker = new Sticker(event.offsetX, event.offsetY, curSticker);
+      drawingData.drawables.push(newSticker);
+    }
     checkAndEnableButtons();
   }
 }
@@ -120,7 +122,7 @@ function draw() {
 }
 
 function moveTool(event: MouseEvent) {
-  if (isDrawing) {
+  if (isDrawing && curSticker == "") {
     const currentDrawable =
       drawingData.drawables[drawingData.drawables.length - 1];
     currentDrawable.drag(event.offsetX, event.offsetY);
@@ -135,8 +137,10 @@ function moveTool(event: MouseEvent) {
   redraw();
 }
 
-function leaveCanvas() {
-  stopPath();
+function leaveCanvas(event: MouseEvent) {
+  if (curSticker == "") {
+    stopPath(event);
+  }
   toolPreview.isRendering = false;
   redraw();
 }
