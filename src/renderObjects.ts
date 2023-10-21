@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { curThickness, curSticker } from "./main.ts";
+import { curThickness, curSticker, curColor } from "./main.ts";
 
 export class ToolPreview {
   x: number;
@@ -18,26 +18,44 @@ export class ToolPreview {
     }
 
     if (curSticker != "") {
-      ctx.fillText(curSticker, this.x, this.y);
+      renderText(ctx, curSticker, this.x, this.y, 0);
       return;
     }
 
-    renderCircle(ctx, this.x, this.y, curThickness);
+    renderCircle(ctx, this.x, this.y, curThickness, curColor);
   }
+}
+
+function renderText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  rotation: number
+) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((Math.PI / 180) * rotation);
+  ctx.textAlign = "center";
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
 }
 
 function renderCircle(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  size: number
+  size: number,
+  color: string
 ) {
+  console.log(color);
   const thickness = size / 2;
-  ctx.strokeStyle = "black";
+  ctx.strokeStyle = color;
   ctx.lineWidth = thickness;
   ctx.beginPath();
   ctx.ellipse(x, y, thickness / 2, thickness / 2, 0, 0, 2 * Math.PI);
   ctx.stroke();
+  ctx.fillStyle = color;
   ctx.fill();
 }
 
@@ -59,17 +77,19 @@ export class Sticker {
   }
 
   display(ctx: CanvasRenderingContext2D) {
-    ctx.fillText(this.text, this.x, this.y);
+    renderText(ctx, this.text, this.x, this.y, 0);
   }
 }
 
 export class MarkerLine {
   private points: { x: number; y: number }[] = [];
   private thickness;
+  private color;
 
   constructor(initialX: number, initialY: number, thickness: number) {
     this.points.push({ x: initialX, y: initialY });
     this.thickness = thickness;
+    this.color = curColor;
   }
 
   drag(x: number, y: number) {
@@ -78,10 +98,16 @@ export class MarkerLine {
 
   display(ctx: CanvasRenderingContext2D) {
     //Render a circle at the start of the line
-    renderCircle(ctx, this.points[0].x, this.points[0].y, this.thickness);
+    renderCircle(
+      ctx,
+      this.points[0].x,
+      this.points[0].y,
+      this.thickness,
+      this.color
+    );
 
     if (this.points.length > 1) {
-      ctx.strokeStyle = "black";
+      ctx.strokeStyle = this.color;
       ctx.lineJoin = "round";
       ctx.lineWidth = this.thickness;
 
@@ -97,7 +123,8 @@ export class MarkerLine {
         ctx,
         this.points[lastIndex].x,
         this.points[lastIndex].y,
-        this.thickness
+        this.thickness,
+        this.color
       );
     }
   }

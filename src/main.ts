@@ -21,7 +21,6 @@ context.font = font;
 // Create a data structure to define the buttons I'm going to be linking
 interface Button {
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   func(): void;
   disabled: boolean;
 }
@@ -64,8 +63,14 @@ function promptForStamp() {
 }
 
 let isDrawing = false;
+export let curColor = "black";
 export let curThickness = 5;
 export let curSticker = "";
+
+const colorInput = document.getElementById("colorInput")! as HTMLInputElement;
+colorInput.addEventListener("input", () => {
+  curColor = colorInput.value;
+});
 
 function setBrush(arg: number | string) {
   if (typeof arg === "number") {
@@ -194,6 +199,7 @@ function checkAndEnableButtons() {
   redoButton.disabled = drawingData.redoList.length == 0;
 }
 
+// Create a high-res copy of the canvas and download the image
 function exportDrawing() {
   // Create a new canvas element
   const exportCanvas = document.createElement("canvas");

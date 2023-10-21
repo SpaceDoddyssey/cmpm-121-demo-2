@@ -44,6 +44,14 @@ h1 {
   text-align: center;
 }
 
+input[type="color"] {
+  border: none transparent;
+  background-color: rgba(1,1,1, 0);
+  border-image-width: 0;
+	width: 1.7em;
+	height: 1.7em;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -51,7 +59,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: rgba(255,0,0,100.5);
+  background-color: rgba(255,0,0, 0.5);
   cursor: pointer;
   transition: border-color 0.25s;
 }
