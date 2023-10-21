@@ -11,10 +11,12 @@ const header = document.createElement("h1");
 header.innerHTML = gameName;
 app.prepend(header);
 
+const font = "32px serif";
+
 const canvas = document.getElementById("drawingCanvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d")!;
 context.textAlign = "center";
-context.font = "24px serif";
+context.font = font;
 
 // Create a data structure to define the buttons I'm going to be linking
 interface Button {
@@ -28,11 +30,11 @@ const buttons: Button[] = [
   { name: "undoButton", func: undo, disabled: true },
   { name: "redoButton", func: redo, disabled: true },
   { name: "exportButton", func: exportDrawing, disabled: false },
-  { name: "2pxButton", func: () => setBrush(2), disabled: false },
-  { name: "5pxButton", func: () => setBrush(5), disabled: false },
-  { name: "10pxButton", func: () => setBrush(10), disabled: false },
-  { name: "smileButton", func: () => setBrush("😊"), disabled: false },
-  { name: "alienButton", func: () => setBrush("👽"), disabled: false },
+  { name: "thinButton", func: () => setBrush(2), disabled: false },
+  { name: "mediumButton", func: () => setBrush(8), disabled: false },
+  { name: "thickButton", func: () => setBrush(16), disabled: false },
+  { name: "smileButton", func: () => setBrush("🙂"), disabled: false },
+  { name: "catButton", func: () => setBrush("🐱"), disabled: false },
   { name: "thumbsupButton", func: () => setBrush("👍"), disabled: false },
 ];
 
@@ -201,7 +203,7 @@ function exportDrawing() {
 
   // Scale the export context to match the larger canvas
   exportContext.scale(4, 4);
-  exportContext.font = "24px serif";
+  exportContext.font = font;
 
   // Copy over all items on the display list
   for (const item of drawingData.drawables) {
