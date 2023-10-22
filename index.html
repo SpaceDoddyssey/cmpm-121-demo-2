@@ -9,10 +9,12 @@
   </head>
   <body>
     <div id="app">
+      <h1>Cameron's Paint Toy</h1>
+
       <canvas id="drawingCanvas" width="256" height="256" style="border:2px solid"></canvas>
       <br>
     
-      <!-- First row of buttons -->
+      <!-- Action buttons -->
       <div>
         <button id="clearButton">Clear</button>
         <button id="undoButton">Undo</button>
@@ -20,7 +22,7 @@
         <button id="exportButton">Export</button>
       </div>
     
-      <!-- Second row of buttons -->
+      <!-- Brush buttons -->
       <div>
         Brush Size:
         <button id="thinButton">2px</button>
@@ -39,6 +41,11 @@
         <button id="catButton">🐱</button>
         <button id="thumbsupButton">👍</button>
       </div>
+
+      Stamp rotation:
+      <input type="range" id="rotSlider" min="0" max="360" value="0">
+      <label id="rotLabel">0°</label>
+      <br>
 
       <button id="customButton">Add Custom Stamp</button>
       

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { curThickness, curSticker, curColor } from "./main.ts";
+import { curThickness, curSticker, curColor, curRotation } from "./main.ts";
 
 export class ToolPreview {
   x: number;
@@ -18,7 +18,7 @@ export class ToolPreview {
     }
 
     if (curSticker != "") {
-      renderText(ctx, curSticker, this.x, this.y, 0);
+      renderText(ctx, curSticker, this.x, this.y, curRotation);
       return;
     }
 
@@ -48,7 +48,6 @@ function renderCircle(
   size: number,
   color: string
 ) {
-  console.log(color);
   const thickness = size / 2;
   ctx.strokeStyle = color;
   ctx.lineWidth = thickness;
@@ -63,11 +62,13 @@ export class Sticker {
   private x: number;
   private y: number;
   private text: string;
+  private rotation: number;
 
-  constructor(x: number, y: number, text: string) {
+  constructor(x: number, y: number, text: string, rot: number) {
     this.x = x;
     this.y = y;
     this.text = text;
+    this.rotation = rot;
   }
 
   //Drag is currently never called, but I'm keeping it around in case I need to use it later
@@ -77,7 +78,7 @@ export class Sticker {
   }
 
   display(ctx: CanvasRenderingContext2D) {
-    renderText(ctx, this.text, this.x, this.y, 0);
+    renderText(ctx, this.text, this.x, this.y, this.rotation);
   }
 }
 

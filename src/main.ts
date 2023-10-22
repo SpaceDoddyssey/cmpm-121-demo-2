@@ -3,20 +3,18 @@ import "./style.css";
 
 import { ToolPreview, MarkerLine, Sticker, Drawable } from "./renderObjects.ts";
 
-const app: HTMLDivElement = document.querySelector("#app")!;
-
-const gameName = "Cameron's Paint Game";
-document.title = gameName;
-const header = document.createElement("h1");
-header.innerHTML = gameName;
-app.prepend(header);
-
 const font = "32px serif";
 
 const canvas = document.getElementById("drawingCanvas") as HTMLCanvasElement;
 const context = canvas.getContext("2d")!;
 context.textAlign = "center";
 context.font = font;
+
+let isDrawing = false;
+export let curColor = "black";
+export let curThickness = 5;
+export let curSticker = "";
+export let curRotation = 0;
 
 // Create a data structure to define the buttons I'm going to be linking
 interface Button {
@@ -59,14 +57,10 @@ function promptForStamp() {
   button.addEventListener("click", () => setBrush(customText!));
   stampButtonDiv.append(button);
 
-  console.log(customText);
+  console.log(`${customText} stamp added`);
 }
 
-let isDrawing = false;
-export let curColor = "black";
-export let curThickness = 5;
-export let curSticker = "";
-
+// Set up color input
 const colorInput = document.getElementById("colorInput")! as HTMLInputElement;
 colorInput.addEventListener("input", () => {
   curColor = colorInput.value;
@@ -81,6 +75,14 @@ function setBrush(arg: number | string) {
     curThickness = 0;
   }
 }
+
+//Stamp rotation slider
+const rotSlider = document.getElementById("rotSlider")! as HTMLInputElement;
+const rotLabel = document.getElementById("rotLabel")! as HTMLLabelElement;
+rotSlider.addEventListener("input", function () {
+  curRotation = parseInt(rotSlider.value, 10);
+  rotLabel.textContent = `${curRotation}°`;
+});
 
 // Define an interface to store drawing data
 interface DrawingData {
@@ -110,7 +112,12 @@ function stopPath(event: MouseEvent) {
     isDrawing = false;
 
     if (curSticker != "") {
-      const newSticker = new Sticker(event.offsetX, event.offsetY, curSticker);
+      const newSticker = new Sticker(
+        event.offsetX,
+        event.offsetY,
+        curSticker,
+        curRotation
+      );
       drawingData.drawables.push(newSticker);
     }
     checkAndEnableButtons();
